@@ -1,6 +1,12 @@
 version: '3.3'
 services:
 
+  backend:
+    build: ../backend/foodgram
+    # env_file: .env
+    # volumes:
+    #   - static:/static
+    #   - media:/app/media
   frontend:
     build:
       context: ../frontend
