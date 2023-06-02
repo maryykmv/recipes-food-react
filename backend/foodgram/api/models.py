@@ -1,8 +1,8 @@
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-User = get_user_model()
+from users.models import User
+# User = get_user_model()
 
 
 class Ingredient(models.Model):
