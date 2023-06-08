@@ -117,7 +117,7 @@ class RecipeIngredient(models.Model):
         related_name='recipes',
         verbose_name='Ингредиент'
     )
-    count = models.IntegerField(
+    amount = models.IntegerField(
         verbose_name=_('Количество'),
         help_text=_('Количество')
     )
