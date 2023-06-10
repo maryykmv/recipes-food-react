@@ -49,7 +49,11 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IngredientRecipe
-        fields = ('id', 'name', 'measurement_unit', 'amount',)
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+        validators = [serializers.UniqueTogetherValidator(
+            queryset=IngredientRecipe.objects.all(),
+            fields=('recipe', 'ingredient')
+            )]
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
@@ -144,13 +148,39 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Favorite."""
+    user = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(), read_only=True)
+    recipe = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all(), write_only=True)
+
     class Meta:
         model = Favorite
-        fields = ('__all__')
+        fields = ('user', 'recipe')
+        validators = [serializers.UniqueTogetherValidator(
+            queryset=Favorite.objects.all(),
+            fields=['user', 'recipe']
+            )]
+
+    def create(self, validated_data):
+        return Favorite.objects.create(
+            user=self.context.get('request').user, **validated_data)
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
     """Сериализатор для модели ShoppingList."""
+    user = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(), read_only=True)
+    recipe = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all(), write_only=True)
+
     class Meta:
         model = ShoppingList
-        fields = ('__all__')
+        fields = ('user', 'recipe')
+        validators = [serializers.UniqueTogetherValidator(
+            queryset=ShoppingList.objects.all(),
+            fields=['user', 'recipe']
+            )]
+
+    def create(self, validated_data):
+        return ShoppingList.objects.create(
+            user=self.context.get('request').user, **validated_data)
