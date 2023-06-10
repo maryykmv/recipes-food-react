@@ -76,7 +76,7 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='RecipeIngredient',
+        through='IngredientRecipe',
         verbose_name=_('Ингредиенты'),
         help_text=_('Ингредиенты')
 
@@ -92,7 +92,6 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         constraints = [
@@ -104,17 +103,17 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeIngredient(models.Model):
+class IngredientRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='ingredientrecipe',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='ingredientrecipe',
         verbose_name='Ингредиент'
     )
     amount = models.IntegerField(
@@ -123,7 +122,6 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
         constraints = [
