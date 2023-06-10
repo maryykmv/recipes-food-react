@@ -5,8 +5,10 @@ from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+
 from .models import (Ingredient, Favorite, Recipe, IngredientRecipe,
                      ShoppingList, Tag)
+from users.models import Subscription
 from users.serializers import UserSerializer
 
 User = get_user_model()
@@ -144,6 +146,44 @@ class RecipeSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         )
         return serializer.data
+
+
+class RecipeSubscriptionSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания объекта класса Subscription."""
+    id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.ReadOnlyField(source='author.recipes.count')
+
+    class Meta:
+        model = Subscription
+        fields = ('id', 'email', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count')
+
+    def get_is_subscribed(self, obj):
+        return Subscription.objects.filter(
+            user=obj.user, author=obj.author
+        ).exists()ShoppingCart
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        page_size = request.GET.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj.author)
+        if page_size:
+            queryset = queryset[:int(page_size)]
+        return RecipeSubscriptionSerializer(queryset, many=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

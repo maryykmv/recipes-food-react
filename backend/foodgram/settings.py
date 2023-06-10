@@ -106,8 +106,8 @@ STATIC_URL = '/backend_static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static')
 
 MEDIA_URL = '/media/'
-if MEDIA_DOMAIN:
-    MEDIA_URL = MEDIA_DOMAIN + MEDIA_URL
+# if MEDIA_DOMAIN:
+#     MEDIA_URL = MEDIA_DOMAIN + MEDIA_URL
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -121,6 +121,9 @@ PAGE_SIZE = 6
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
+    ],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend"
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -137,5 +140,6 @@ DJOSER = {
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
     },
 }
