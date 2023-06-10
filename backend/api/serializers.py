@@ -52,10 +52,6 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
-        validators = [serializers.UniqueTogetherValidator(
-            queryset=IngredientRecipe.objects.all(),
-            fields=('recipe', 'ingredient')
-            )]
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
@@ -101,21 +97,21 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'author', 'name', 'image', 'text', 'ingredients',
                   'tags', 'cooking_time')
 
+    @staticmethod
     def create_ingredient(ingredients, recipe):
         lst = []
         for ingredient in ingredients:
             current_ingredient = ingredient['ingredient']
             current_amount = ingredient.get('amount')
             lst.append(IngredientRecipe(recipe=recipe,
-                                        ingredient=current_ingredient,
+                                        ingredient=current_ingredient['id'],
                                         amount=current_amount))
         IngredientRecipe.objects.bulk_create(lst)
 
     def create(self, validated_data):
-        author = self.context.get('request').user
         ingredients = validated_data.pop('IngredientRecipe')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data, author=author)
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.create_ingredient(ingredients, recipe)
         return recipe
@@ -179,11 +175,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
+        context = {'request': request}
         page_size = request.GET.get('recipes_limit')
         queryset = Recipe.objects.filter(author=obj.author)
         if page_size:
             queryset = queryset[:int(page_size)]
-        return RecipeSubscriptionSerializer(queryset, many=True).data
+        return RecipeSubscriptionSerializer(queryset, context=context,
+                                            many=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

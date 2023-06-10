@@ -31,12 +31,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
     def get_serializer_class(self):
-        if (self.request.method == 'GET' or self.action in ['favorite', 'shopping_cart', ]):
+        if (self.request.method == 'GET' #or self.action in ['favorite', 'shopping_cart', ]
+            ):
             return RecipeListSerializer
         return RecipeSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(author=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -51,12 +52,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST', 'DELETE'])
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
+        context = {'request': request}
         if self.request.method == 'POST':
             if (Favorite.objects.filter(user=request.user, recipe=recipe).exists()):
                 return Response('Рецепт уже есть в избранном',
-                    status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_400_BAD_REQUEST)
             Favorite.objects.get_or_create(user=request.user, recipe=recipe)
-            data = FavoriteSerializer(recipe).data
+            data = FavoriteSerializer(recipe, context=context).data
             return Response(data, status=status.HTTP_201_CREATED)
         if Favorite.objects.filter(user=request.user, recipe=recipe).exists():
             follow = get_object_or_404(Favorite,
@@ -70,14 +72,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
+        context = {'request': request}
         if self.request.method == 'POST':
-            if (ShoppingList.objects.filter(user=request.user, recipe=recipe).exists()):
+            if (ShoppingList.objects.filter(user=request.user, recipe=recipe
+                                            ).exists()):
                 return Response('Рецепт уже есть в списке покупок',
                                 status=status.HTTP_400_BAD_REQUEST)
-            ShoppingList.objects.get_or_create(user=request.user, recipe=recipe)
-            data = ShoppingListSerializer(recipe).data
+            ShoppingList.objects.get_or_create(user=request.user,
+                                               recipe=recipe)
+            data = ShoppingListSerializer(recipe, context=context).data
             return Response(data, status=status.HTTP_201_CREATED)
-        if ShoppingList.objects.filter(user=request.user, recipe=recipe).exists():
+        if ShoppingList.objects.filter(user=request.user, recipe=recipe
+                                       ).exists():
             follow = get_object_or_404(ShoppingList,
                                        user=request.user, recipe=recipe)
             follow.delete()
