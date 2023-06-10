@@ -39,9 +39,17 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели RecipeIngredient."""
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all(),
+                                            source='ingredient.id')
+    name = serializers.CharField(source='ingredient.name',
+                                 read_only=True)
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit',
+        read_only=True)
+
     class Meta:
         model = IngredientRecipe
-        fields = ('__all__')
+        fields = ('id', 'name', 'measurement_unit', 'amount',)
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
@@ -73,13 +81,13 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Recipe запрос POST."""
+    """Сериализатор для создания рецептов."""
     author = UserSerializer(default=serializers.CurrentUserDefault(),
                             read_only=True)
-    ingredients = IngredientRecipeSerializer(source='IngredientRecipe',
-                                             many=True, read_only=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
-                                              many=True,)
+                                              many=True)
+    ingredients = IngredientRecipeSerializer(source='IngredientRecipe',
+                                             many=True)
     image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -91,19 +99,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         lst = []
         for ingredient in ingredients:
             current_ingredient = ingredient['ingredient']
-            current_amount = ingredient.get['amount']
-            lst.append(
-                IngredientRecipe(
-                    recipe=recipe,
-                    ingredient=current_ingredient,
-                    amount=current_amount
-                )
-            )
+            current_amount = ingredient.get('amount')
+            lst.append(IngredientRecipe(recipe=recipe,
+                                        ingredient=current_ingredient,
+                                        amount=current_amount))
         IngredientRecipe.objects.bulk_create(lst)
 
     def create(self, validated_data):
         author = self.context.get('request').user
-        ingredients = validated_data.pop('ingredientrecipe')
+        ingredients = validated_data.pop('IngredientRecipe')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data, author=author)
         recipe.tags.set(tags)
@@ -119,7 +123,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if 'ingredients' not in validated_data:
             instance.save()
             return instance
-        ingredients = validated_data.pop('ingredientrecipe')
+        ingredients = validated_data.pop('IngredientRecipe')
         if 'tags' not in validated_data:
             instance.save()
             return instance
