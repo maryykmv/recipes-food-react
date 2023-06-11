@@ -57,7 +57,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe запрос GET."""
     tags = TagSerializer(many=True, read_only=True)
-    author = UserSerializer()
+    author = UserSerializer(read_only=True)
     ingredients = IngredientRecipeSerializer(source='IngredientRecipe',
                                              many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
