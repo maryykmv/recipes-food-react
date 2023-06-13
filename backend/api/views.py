@@ -1,10 +1,24 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from django.db.models import Sum
 
-from .models import Ingredient, Favorite, Recipe, ShoppingList, Tag
+from io import BytesIO
+
+from django.http import HttpResponse
+from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import Table
+from django.contrib.auth.decorators import login_required
+from reportlab.pdfbase import pdfmetrics, ttfonts
+from reportlab.pdfgen import canvas
+
+
+from .models import Ingredient, Favorite, Recipe, ShoppingList, Tag, IngredientRecipe
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, FavoriteSerializer,
@@ -12,13 +26,13 @@ from .serializers import (IngredientSerializer, FavoriteSerializer,
                           ShoppingListSerializer, TagSerializer)
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
+class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [AllowAny, ]
 
 
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny, ]
@@ -98,3 +112,57 @@ class RecipeViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_204_NO_CONTENT)
         return Response('Рецепта нет в списке покупок',
                         status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+    detail=False,
+    permission_classes=[IsAuthenticated, ])
+    def download_shopping_cart(self, request):
+        pdfmetrics.registerFont(ttfonts.TTFont('Arial', 'Arial.ttf'))
+        user = request.user
+        buff = BytesIO()
+        doc = SimpleDocTemplate(buff,
+                                pagesize=letter,
+                                rightMargin=40,
+                                leftMargin=40,
+                                topMargin=60,
+                                bottomMargin=18,
+                                )
+        ingredients = []
+        styles = getSampleStyleSheet()
+        pstyle = ParagraphStyle('yourtitle',
+                           fontName="Arial",
+                           fontSize=16,
+                           parent=styles['Heading1'],
+                           alignment=1,
+                           spaceAfter=14)
+        header = Paragraph("Список продуктов", pstyle)
+        ingredients.append(header)
+        headings = ('Название', 'Количество', 'Единица измерения')
+        allingredients = [(p["ingredient__name"],
+                           p["amount"],
+                           p["ingredient__measurement_unit"])
+                           for p in IngredientRecipe.objects.filter(
+            recipe__list__user=user).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(
+            amount=Sum('amount')
+        ).order_by()]
+
+        t = Table([headings] + allingredients)
+        t.setStyle(TableStyle(
+            [
+                ('GRID', (0, 0), (6, -1), 1, colors.azure),
+                ('LINEBELOW', (0, 0), (-1, 0), 2, colors.azure),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.azure),
+                ('FONT', (0, 0), (-1, 1), 'Arial', 14)
+            ]
+        ))
+
+        ingredients.append(t)
+        doc.build(ingredients)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename=shopping_list.pdf'
+        response.write(buff.getvalue())
+        buff.close()
+        return response
