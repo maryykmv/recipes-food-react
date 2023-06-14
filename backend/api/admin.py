@@ -4,8 +4,10 @@ from django.contrib import admin
 from .models import (Ingredient, Favorite, Recipe, IngredientRecipe,
                      ShoppingList, Tag)
 
+from import_export.admin import ImportExportModelAdmin
 
-class TagAdmin(admin.ModelAdmin):
+
+class TagAdmin(ImportExportModelAdmin):
     list_display = ('id', 'name', 'color', 'slug')
     search_fields = ('name', 'slug')
     list_filter = ('name', 'slug',)
@@ -13,7 +15,7 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
 
-class IngredientAdmin(admin.ModelAdmin):
+class IngredientAdmin(ImportExportModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
     search_fields = ('name',)
     list_filter = ('name',)

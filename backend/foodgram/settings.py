@@ -11,6 +11,8 @@ DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(' ')
 
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -25,7 +27,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'api.apps.ApiConfig',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig',
+    'import_export',
 ]
 
 MIDDLEWARE = [
