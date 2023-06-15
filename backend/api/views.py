@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -18,6 +19,7 @@ from reportlab.pdfbase import pdfmetrics, ttfonts
 from reportlab.pdfgen import canvas
 
 
+from .filters import IngredientFilter, RecipeFilter
 from .models import Ingredient, Favorite, Recipe, ShoppingList, Tag, IngredientRecipe
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly
@@ -36,6 +38,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny, ]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -43,10 +47,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeListSerializer
     pagination_class = CustomPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if (self.request.method == 'GET' #or self.action in ['favorite', 'shopping_cart', ]
-            ):
+        if (self.request.method == 'GET'):
             return RecipeListSerializer
         return RecipeSerializer
 

@@ -90,9 +90,13 @@ class Recipe(models.Model):
         verbose_name=_('Время приготовления в минутах'),
         help_text=_('Время приготовления в минутах')
     )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-pub_date']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         constraints = [

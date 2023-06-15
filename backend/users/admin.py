@@ -5,25 +5,20 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, Subscription
 
 
+# Для модели пользователей включена фильтрация по имени и email.
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = (
-        'pk',
-        'username',
-        'email',
-        'first_name',
-        'last_name'
-    )
-    search_fields = ('email', 'username',)
-    list_filter = ('email', 'username',)
-    ordering = ('id',)
+    list_display = ['id', 'username', 'email', 'first_name', 'last_name']
+    search_fields = ['email', 'username']
+    list_filter = ['email', 'username']
+    ordering = ['id']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'author')
-    search_fields = ('user', 'author')
-    list_filter = ('user', 'author')
+    list_display = ['user', 'author']
+    search_fields = ['user', 'author']
+    list_filter = ['user', 'author']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
 
