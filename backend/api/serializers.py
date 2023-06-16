@@ -58,8 +58,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe запрос GET."""
     tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
-    ingredients = IngredientRecipeSerializer(source='IngredientRecipe',
-                                             many=True, read_only=True)
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -81,6 +80,10 @@ class RecipeListSerializer(serializers.ModelSerializer):
             return False
         return ShoppingList.objects.filter(recipe=obj, user=user).exists()
 
+    def get_ingredients(self, obj):
+        recipe_ingredients = IngredientRecipe.objects.filter(recipe=obj)
+        return IngredientRecipeSerializer(recipe_ingredients, many=True).data
+
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для создания рецептов."""
@@ -88,8 +91,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                             read_only=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
                                               many=True)
-    ingredients = IngredientRecipeSerializer(source='IngredientRecipe',
-                                             many=True)
+    ingredients = IngredientRecipeSerializer(many=True)
     image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -109,7 +111,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         IngredientRecipe.objects.bulk_create(lst)
 
     def create(self, validated_data):
-        ingredients = validated_data.pop('IngredientRecipe')
+        ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
@@ -125,12 +127,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         if 'ingredients' not in validated_data:
             instance.save()
             return instance
-        ingredients = validated_data.pop('IngredientRecipe')
+        ingredients = validated_data.pop('ingredients')
+        instance.tags.clear()
         if 'tags' not in validated_data:
             instance.save()
             return instance
         tags = validated_data.pop('tags')
+        instance.tags.clear()
         instance.tags.set(tags)
+        instance.ingredients.clear()
         recipe = instance
         self.create_ingredient(ingredients, recipe)
         instance.save()
