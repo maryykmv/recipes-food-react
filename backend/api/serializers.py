@@ -27,29 +27,34 @@ class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Tag."""
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'color', 'slug')
+        fields = ['id', 'name', 'color', 'slug']
 
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Ingredient."""
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = ['id', 'name', 'measurement_unit']
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели RecipeIngredient."""
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(),
-        source='ingredient.id')
-    name = serializers.CharField(source='ingredient.name')
+        source='ingredient.id'
+    )
+    name = serializers.CharField(
+        source='ingredient.name',
+        read_only=True
+    )
     measurement_unit = serializers.CharField(
-        source='ingredient.measurement_unit')
+        source='ingredient.measurement_unit',
+        read_only=True
+    )
 
     class Meta:
         model = IngredientRecipe
-        fields = ('id', 'name', 'measurement_unit', 'amount')
-        read_only_fields = ['name', 'measurement_unit']
+        fields = ['id', 'name', 'measurement_unit', 'amount']
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
@@ -124,14 +129,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.image = validated_data.get('image', instance.image)
         instance.cooking_time = validated_data.get('cooking_time',
                                                    instance.cooking_time)
-        if 'ingredients' not in validated_data:
+        if ('ingredients' and 'tags') not in validated_data:
             instance.save()
             return instance
         ingredients = validated_data.pop('ingredients')
         instance.ingredients.clear()
-        if 'tags' not in validated_data:
-            instance.save()
-            return instance
         tags = validated_data.pop('tags')
         instance.tags.clear()
         instance.tags.set(tags)

@@ -24,7 +24,7 @@ class IngredientAdmin(ImportExportModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'name', 'author', 'count_favorites', 'tags']
+    list_display = ['pk', 'name', 'author', 'count_favorites']
     search_fields = ['name', 'author', 'tags']
     list_filter = ['name', 'author', 'tags']
     ordering = ['name']
