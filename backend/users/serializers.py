@@ -8,7 +8,7 @@ User = get_user_model()
 
 
 class UserCreateSerializer(UserCreateSerializer):
-    """Сериализатор для создания объекта класса User."""
+    """Сериализатор для создания модели User."""
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
@@ -16,7 +16,7 @@ class UserCreateSerializer(UserCreateSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания объекта класса User."""
+    """Сериализатор для модели User."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:

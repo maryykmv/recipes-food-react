@@ -1,26 +1,22 @@
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from django.db.models import Sum
-
 from io import BytesIO
 
+from django.db.models import Sum
+from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
-from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from reportlab.pdfbase import pdfmetrics, ttfonts
+from reportlab.platypus import SimpleDocTemplate, Paragraph, TableStyle, Table
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.platypus import Table
-from django.contrib.auth.decorators import login_required
-from reportlab.pdfbase import pdfmetrics, ttfonts
-from reportlab.pdfgen import canvas
-
 
 from .filters import IngredientFilter, RecipeFilter
-from .models import Ingredient, Favorite, Recipe, ShoppingList, Tag, IngredientRecipe
+from .models import (Ingredient, Favorite, Recipe, ShoppingList, Tag,
+                     IngredientRecipe)
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, FavoriteSerializer,
@@ -29,31 +25,24 @@ from .serializers import (IngredientSerializer, FavoriteSerializer,
 
 
 class TagViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthorOrReadOnly]
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [AllowAny, ]
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthorOrReadOnly]
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = [AllowAny, ]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthorOrReadOnly, ]
-    queryset = Recipe.objects.all()
-    # serializer_class = RecipeListSerializer
+    permission_classes = [IsAuthorOrReadOnly]
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
-
-    def get_serializer_class(self):
-        if (self.request.method == 'GET'):
-            return RecipeListSerializer
-        return RecipeSerializer
 
     def get_queryset(self):
         if self.request.GET.get('is_favorited'):
@@ -62,6 +51,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Recipe.objects.filter(list__user=self.request.user)
         return Recipe.objects.all()
 
+    def get_serializer_class(self):
+        if (self.request.method == 'GET'):
+            return RecipeListSerializer
+        return RecipeSerializer
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -69,11 +63,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            self.permission_classes = [IsAuthorOrReadOnly, ]
-        return super().get_permissions()
 
     @action(detail=True, methods=['POST', 'DELETE'])
     def favorite(self, request, pk):
@@ -118,9 +107,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response('Рецепта нет в списке покупок',
                         status=status.HTTP_400_BAD_REQUEST)
 
-    @action(
-    detail=False,
-    permission_classes=[IsAuthenticated, ])
+    @action(detail=False, permission_classes=[IsAuthenticated, ])
     def download_shopping_cart(self, request):
         pdfmetrics.registerFont(ttfonts.TTFont('Arial', 'Arial.ttf'))
         user = request.user
@@ -134,12 +121,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                 )
         ingredients = []
         styles = getSampleStyleSheet()
-        pstyle = ParagraphStyle('yourtitle',
-                           fontName="Arial",
-                           fontSize=16,
-                           parent=styles['Heading1'],
-                           alignment=1,
-                           spaceAfter=14)
+        pstyle = ParagraphStyle('Список продуктов',
+                                fontName="Arial",
+                                fontSize=16,
+                                parent=styles['Heading1'],
+                                alignment=1,
+                                spaceAfter=14)
         header = Paragraph("Список продуктов", pstyle)
         ingredients.append(header)
         headings = ('Название', 'Количество', 'Единица измерения')
@@ -167,7 +154,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients.append(t)
         doc.build(ingredients)
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename=shopping_list.pdf'
+        response['Content-Disposition'] = ('attachment;'
+                                           'filename=shopping_list.pdf')
         response.write(buff.getvalue())
         buff.close()
         return response

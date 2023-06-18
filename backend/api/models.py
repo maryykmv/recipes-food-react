@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -17,12 +18,12 @@ class Tag(models.Model):
         help_text=_('Цветовой HEX-код'),
         max_length=7,
         unique=True,
-        default='#49B64E'
+        default='#DA70D6'
     )
     slug = models.SlugField(
         verbose_name=_('Идентификатор'),
         help_text=_('Идентификатор'),
-        max_length=200,
+        max_length=50,
         unique=True
     )
 
@@ -43,7 +44,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField(
         verbose_name=_('Единица измерения'),
         help_text=_('Единица измерения'),
-        max_length=200
+        max_length=50
     )
 
     class Meta:
@@ -120,6 +121,7 @@ class IngredientRecipe(models.Model):
         verbose_name='Ингредиент'
     )
     amount = models.IntegerField(
+        validators=[MinValueValidator(1)],
         verbose_name=_('Количество'),
         help_text=_('Количество')
     )

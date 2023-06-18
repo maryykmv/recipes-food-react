@@ -1,14 +1,14 @@
 from django.conf import settings
 from django.contrib import admin
 
-from .models import (Ingredient, Favorite, Recipe, IngredientRecipe,
-                     ShoppingList, Tag)
-
 from import_export.admin import ImportExportModelAdmin
+
+from .models import (Ingredient, IngredientRecipe, Favorite, Recipe,
+                     ShoppingList, Tag)
 
 
 class TagAdmin(ImportExportModelAdmin):
-    list_display = ['id', 'name', 'color', 'slug']
+    list_display = ['pk', 'name', 'color', 'slug']
     search_fields = ['name', 'slug']
     list_filter = ['name', 'slug']
     ordering = ['name']
@@ -16,16 +16,15 @@ class TagAdmin(ImportExportModelAdmin):
 
 
 class IngredientAdmin(ImportExportModelAdmin):
-    list_display = ['id', 'name', 'measurement_unit']
+    list_display = ['pk', 'name', 'measurement_unit']
     search_fields = ['name']
     list_filter = ['name']
     ordering = ['id']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
-# Для модели рецептов включена фильтрация по названию, автору и тегам.
-# На админ-странице рецепта отображается общее число добавлений этого рецепта в избранное.
+
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'author', 'count_favorites', 'tags']
+    list_display = ['pk', 'name', 'author', 'count_favorites', 'tags']
     search_fields = ['name', 'author', 'tags']
     list_filter = ['name', 'author', 'tags']
     ordering = ['name']
@@ -36,21 +35,21 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class IngredientRecipeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'recipe', 'ingredient', 'amount']
+    list_display = ['pk', 'recipe', 'ingredient', 'amount']
     search_fields = ['recipe', 'ingredient']
     list_filter = ['recipe', 'ingredient']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
 
 class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'recipe']
+    list_display = ['pk', 'user', 'recipe']
     search_fields = ['user', 'recipe']
     list_filter = ['user', 'recipe']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
 
 class ShoppingListAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'recipe']
+    list_display = ['pk', 'user', 'recipe']
     search_fields = ['user', 'recipe']
     list_filter = ['user', 'recipe']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
