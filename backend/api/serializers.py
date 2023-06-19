@@ -105,7 +105,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ['author']
 
     @staticmethod
-    def create_ingredient(ingredients, recipe):
+    def add_ingredient(ingredients, recipe):
         lst = []
         for ingredient in ingredients:
             current_ingredient = ingredient['ingredient']
@@ -120,7 +120,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        self.create_ingredient(ingredients, recipe)
+        self.add_ingredient(ingredients, recipe)
         return recipe
 
     def update(self, instance, validated_data):
@@ -138,7 +138,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         recipe = instance
-        self.create_ingredient(ingredients, recipe)
+        self.add_ingredient(ingredients, recipe)
         instance.save()
         return instance
 
@@ -160,8 +160,8 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор для создания объекта класса Subscription."""
-    id = serializers.ReadOnlyField(source='author.id')
     email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
@@ -171,7 +171,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ['id', 'email', 'username', 'first_name', 'last_name',
+        fields = ['email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count']
 
     def get_is_subscribed(self, obj):

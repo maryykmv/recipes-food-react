@@ -67,44 +67,40 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST', 'DELETE'])
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
-        context = {'request': request}
+        serializer = FavoriteSerializer(recipe, context={'request': request})
         if self.request.method == 'POST':
-            if (Favorite.objects.filter(user=request.user, recipe=recipe).exists()):
-                return Response('Рецепт уже есть в избранном',
+            if (Favorite.objects.filter(user=request.user,
+                                        recipe=recipe).exists()):
+                return Response({'error': '!!!Рецепт уже есть в избранном!!!'},
                                 status=status.HTTP_400_BAD_REQUEST)
-            Favorite.objects.get_or_create(user=request.user, recipe=recipe)
-            data = FavoriteSerializer(recipe, context=context).data
-            return Response(data, status=status.HTTP_201_CREATED)
-        if Favorite.objects.filter(user=request.user, recipe=recipe).exists():
-            follow = get_object_or_404(Favorite,
-                                       user=request.user, recipe=recipe)
+            Favorite.objects.create(user=request.user, recipe=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            follow = get_object_or_404(Favorite, user=request.user,
+                                       recipe=recipe)
             follow.delete()
-            return Response('Рецепт удален из избранного',
-                            status=status.HTTP_204_NO_CONTENT)
-        return Response('Рецепта нет в избранном',
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': '!!!Рецепт не добавлен в избранное!!!'},
                         status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
-        context = {'request': request}
+        serializer = ShoppingListSerializer(recipe,
+                                            context={'request': request})
         if self.request.method == 'POST':
-            if (ShoppingList.objects.filter(user=request.user, recipe=recipe
-                                            ).exists()):
-                return Response('Рецепт уже есть в списке покупок',
+            if (ShoppingList.objects.filter(user=request.user,
+                                            recipe=recipe).exists()):
+                return Response({'error': '!!!Рецепт уже есть в списке!!!'},
                                 status=status.HTTP_400_BAD_REQUEST)
-            ShoppingList.objects.get_or_create(user=request.user,
-                                               recipe=recipe)
-            data = ShoppingListSerializer(recipe, context=context).data
-            return Response(data, status=status.HTTP_201_CREATED)
-        if ShoppingList.objects.filter(user=request.user, recipe=recipe
-                                       ).exists():
-            follow = get_object_or_404(ShoppingList,
-                                       user=request.user, recipe=recipe)
+            ShoppingList.objects.create(user=request.user, recipe=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            follow = get_object_or_404(ShoppingList, user=request.user,
+                                       recipe=recipe)
             follow.delete()
-            return Response('Рецепт удален из списка покупок',
-                            status=status.HTTP_204_NO_CONTENT)
-        return Response('Рецепта нет в списке покупок',
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': '!!!Рецепт не добавлен в список!!!'},
                         status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, permission_classes=[IsAuthenticated, ])
