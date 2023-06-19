@@ -147,7 +147,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 ('GRID', (0, 0), (6, -1), 1, colors.azure),
                 ('LINEBELOW', (0, 0), (-1, 0), 2, colors.azure),
                 ('BACKGROUND', (0, 0), (-1, 0), colors.azure),
-                ('FONT', (0, 0), (-1, 1), 'Arial', 14)
+                ('FONT', (0, 0), (-1, -1), 'Arial', 14)
             ]
         ))
 
