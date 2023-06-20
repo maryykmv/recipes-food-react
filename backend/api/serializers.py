@@ -1,26 +1,13 @@
-
-import base64
-
-from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-
 from .models import (Ingredient, Favorite, Recipe, IngredientRecipe,
                      ShoppingList, Tag)
+from .fields import Base64ImageField
 from users.models import Subscription
 from users.serializers import UserSerializer
 
 User = get_user_model()
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -61,7 +48,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe запрос GET."""
     tags = TagSerializer(many=True)
     author = UserSerializer()
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -84,10 +71,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
             return False
         return ShoppingList.objects.filter(recipe=obj, user=user).exists()
 
-    def get_ingredients(self, obj):
-        ingredients_recipe = IngredientRecipe.objects.filter(recipe=obj)
-        return IngredientRecipeSerializer(ingredients_recipe, many=True).data
-
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe запрос CRUD."""
@@ -106,14 +89,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def add_ingredient(ingredients, recipe):
-        lst = []
+        ingredient_list = []
         for ingredient in ingredients:
             current_ingredient = ingredient['ingredient']
             current_amount = ingredient.get('amount')
-            lst.append(IngredientRecipe(recipe=recipe,
-                                        ingredient=current_ingredient['id'],
-                                        amount=current_amount))
-        IngredientRecipe.objects.bulk_create(lst)
+            ingredient_list.append(IngredientRecipe(
+                recipe=recipe,
+                ingredient=current_ingredient['id'],
+                amount=current_amount))
+        IngredientRecipe.objects.bulk_create(ingredient_list)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -124,11 +108,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.image = validated_data.get('image', instance.image)
-        instance.cooking_time = validated_data.get('cooking_time',
-                                                   instance.cooking_time)
         if ('ingredients' and 'tags') not in validated_data:
             instance.save()
             return instance
@@ -140,7 +119,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe = instance
         self.add_ingredient(ingredients, recipe)
         instance.save()
-        return instance
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         serializer = RecipeListSerializer(
@@ -148,6 +127,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             context={'request': self.context.get('request')}
         )
         return serializer.data
+
+    def validate_ingredients(self, value):
+        if Ingredient.objects.filter(name=value).exists():
+            raise serializers.ValidationError(
+                '!!!Ингредиент уже есть!!!')
+        return value
 
 
 class RecipeSubscriptionSerializer(serializers.ModelSerializer):
