@@ -90,7 +90,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания рецептов."""
+    """Сериализатор для модели Recipe запрос CRUD."""
     author = UserSerializer(default=serializers.CurrentUserDefault())
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -159,7 +159,7 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания объекта класса Subscription."""
+    """Сериализатор для модели класса Subscription."""
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
@@ -181,11 +181,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        context = {'request': request}
         page_size = request.GET.get('recipes_limit')
-        queryset = Recipe.objects.filter(author=obj.author)[:int(page_size)]
+        queryset = Recipe.objects.filter(author=obj.author)
+        if page_size is None:
+            return queryset[:int(page_size)]
         return RecipeSubscriptionSerializer(
-            queryset, context=context, many=True).data
+            queryset, context={'request': request}, many=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):

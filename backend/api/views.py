@@ -126,7 +126,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         header = Paragraph("Список продуктов", pstyle)
         ingredients.append(header)
         headings = ('Название', 'Количество', 'Единица измерения')
-        allingredients = [(p["ingredient__name"],
+        allingredients = ([(p["ingredient__name"],
                            p["amount"],
                            p["ingredient__measurement_unit"])
                            for p in IngredientRecipe.objects.filter(
@@ -135,7 +135,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'ingredient__measurement_unit'
         ).annotate(
             amount=Sum('amount')
-        ).order_by()]
+        ).order_by()])
 
         t = Table([headings] + allingredients)
         t.setStyle(TableStyle(

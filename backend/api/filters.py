@@ -4,7 +4,6 @@ from .models import Ingredient, Recipe, Tag
 
 
 class RecipeFilter(django_filters.FilterSet):
-    """Для модели рецептов включена фильтрация по названию, автору и тегам."""
     name = django_filters.CharFilter(lookup_expr='iexact')
     author = django_filters.NumberFilter(
         field_name='author',
@@ -22,7 +21,6 @@ class RecipeFilter(django_filters.FilterSet):
 
 
 class IngredientFilter(django_filters.FilterSet):
-    """Для модели ингредиентов включена фильтрация по названию."""
     name = django_filters.CharFilter(lookup_expr='istartswith')
 
     class Meta:
