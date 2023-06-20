@@ -24,14 +24,18 @@ class IngredientAdmin(ImportExportModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'name', 'author', 'count_favorites']
-    search_fields = ['name', 'author', 'tags']
-    list_filter = ['name', 'author', 'tags']
+    list_display = ['pk', 'name', 'author', 'count_favorites', 'get_tags']
+    search_fields = ['name', 'author__email', 'tags__name']
+    list_filter = ['name', 'author__email', 'tags__name']
     ordering = ['name']
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
 
     def count_favorites(self, obj):
         return obj.favorites.count()
+
+    @admin.display(description='tags')
+    def get_tags(self, obj):
+        return [tag.name for tag in obj.tags.all()]
 
 
 class IngredientRecipeAdmin(admin.ModelAdmin):
