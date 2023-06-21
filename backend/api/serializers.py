@@ -48,7 +48,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe запрос GET."""
     tags = TagSerializer(many=True)
     author = UserSerializer()
-    ingredients = IngredientSerializer(many=True)
+    ingredients = IngredientRecipeSerializer(source='ingredientrecipe_set',
+                                             many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -108,17 +109,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        if ('ingredients' and 'tags') not in validated_data:
-            instance.save()
-            return instance
-        ingredients = validated_data.pop('ingredients')
-        instance.ingredients.clear()
-        tags = validated_data.pop('tags')
-        instance.tags.clear()
-        instance.tags.set(tags)
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+        if 'tags' in validated_data:
+            tags = validated_data.pop('tags')
+            instance.tags.clear()
+            instance.tags.set(tags)
         recipe = instance
         self.add_ingredient(ingredients, recipe)
-        instance.save()
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
