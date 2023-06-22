@@ -184,8 +184,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ['user', 'recipe']
         validators = [serializers.UniqueTogetherValidator(
             queryset=Favorite.objects.all(),
-            fields=['user', 'recipe']
-            )]
+            fields=['user', 'recipe'])]
 
     def create(self, validated_data):
         return Favorite.objects.create(
@@ -203,8 +202,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         fields = ['user', 'recipe']
         validators = [serializers.UniqueTogetherValidator(
             queryset=ShoppingList.objects.all(),
-            fields=['user', 'recipe']
-            )]
+            fields=['user', 'recipe'])]
 
     def create(self, validated_data):
         return ShoppingList.objects.create(
