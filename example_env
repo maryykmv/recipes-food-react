@@ -1,0 +1,9 @@
+SECRET_KEY = ''
+POSTGRES_DB=<db_name>
+POSTGRES_USER=<db_user>
+POSTGRES_PASSWORD=<db_pass>
+DB_HOST=db
+DB_PORT=5432
+MEDIA_DOMAIN='https://...'
+ALLOWED_HOSTS='158.160.69.26 127.0.0.1 backend localhost foodgramprjct.ddns.net'
+DEBUG=False
