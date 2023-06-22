@@ -209,6 +209,13 @@ sudo docker exec -it foodgram-db-1 sh
 cat /tmp/foodgram_db.sql | psql -U <user> <db_name>
 ```
 
+- Остановить docker container и удалить все зависимости:
+!!!ВНИМАНИЕ!!! удалит volumes со всеми данными базы данных
+```
+cd /home/yc-user/foodgram
+sudo docker compose -f docker-compose.production.yml down -v
+```
+
 ## Автор проекта
 _[Мария Константинова](https://github.com/wildcat3333)_, python-developer
 
