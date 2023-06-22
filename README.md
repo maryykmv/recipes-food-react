@@ -1,4 +1,9 @@
 # praktikum_new_diplom
+![workflow](https://github.com/wildcat3333/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+
+URL: https://foodgramprjct.ddns.net
+IP: 158.160.69.26
+
 «Продуктовый помощник». На этом сервисе пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 ___
 ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)
