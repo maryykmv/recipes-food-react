@@ -46,8 +46,8 @@ POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<password>
 DB_HOST=db
 DB_PORT=5432
-MEDIA_DOMAIN='http://prjct.ddns.net'
-ALLOWED_HOSTS='158.160.69.26 127.0.0.1 backend localhost prjct.ddns.net'
+MEDIA_DOMAIN='http://foodgramprjct.ddns.net'
+ALLOWED_HOSTS='158.160.69.26 127.0.0.1 backend localhost foodgramprjct.ddns.net'
 DEBUG=False
 
 ```
