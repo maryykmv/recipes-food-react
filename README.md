@@ -72,7 +72,7 @@ sudo docker compose exec backend python manage.py createsuperuser
 
 - Собираем статику приложения:
 ```
-sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic  --noinput
 ```
 
 - В папке data подготовлен список ингредиентов с единицами измерения и теги.

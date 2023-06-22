@@ -163,14 +163,23 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             user=obj.user, author=obj.author
         ).exists()
 
+    # def get_recipes(self, obj):
+    #     request = self.context.get('request')
+    #     page_size = request.GET.get('recipes_limit')
+    #     queryset = Recipe.objects.filter(author=obj.author)
+    #     if page_size:
+    #         return queryset[:int(page_size)]
+    #     return RecipeSubscriptionSerializer(
+    #         queryset, context={'request': request}, many=True).data
+
     def get_recipes(self, obj):
         request = self.context.get('request')
         page_size = request.GET.get('recipes_limit')
         queryset = Recipe.objects.filter(author=obj.author)
-        if page_size is None:
-            return queryset[:int(page_size)]
-        return RecipeSubscriptionSerializer(
-            queryset, context={'request': request}, many=True).data
+        if page_size:
+            queryset = queryset[:int(page_size)]
+        return RecipeSubscriptionSerializer(queryset, many=True,
+                                            read_only=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
