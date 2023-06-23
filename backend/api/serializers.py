@@ -128,9 +128,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def validate_ingredients(self, value):
-        if Ingredient.objects.filter(name=value).exists():
-            raise serializers.ValidationError(
-                '!!!Ингредиент уже есть!!!')
+        list = []
+        for i in value:
+            ingredient = i['ingredient']['id']
+            amount = i['amount']
+            if ingredient in list:
+                raise serializers.ValidationError({
+                    'ingredients': '!!!Исправьте дублирование ингредиентов!!!'
+                })
+            if int(amount) <= 0:
+                raise serializers.ValidationError({
+                    'amount': '!!!Укажите количество ингредиента > 0 !!!'
+                })
+            list.append(ingredient)
         return value
 
 
@@ -162,15 +172,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return Subscription.objects.filter(
             user=obj.user, author=obj.author
         ).exists()
-
-    # def get_recipes(self, obj):
-    #     request = self.context.get('request')
-    #     page_size = request.GET.get('recipes_limit')
-    #     queryset = Recipe.objects.filter(author=obj.author)
-    #     if page_size:
-    #         return queryset[:int(page_size)]
-    #     return RecipeSubscriptionSerializer(
-    #         queryset, context={'request': request}, many=True).data
 
     def get_recipes(self, obj):
         request = self.context.get('request')
