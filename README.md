@@ -1,4 +1,3 @@
-# praktikum_new_diplom
 ![workflow](https://github.com/wildcat3333/foodgram-project-react/actions/workflows/mail.yml/badge.svg)
 
 URL: https://foodgramprjct.ddns.net
