@@ -1,7 +1,5 @@
-![workflow](https://github.com/wildcat3333/foodgram-project-react/actions/workflows/mail.yml/badge.svg)
+![workflow](https://github.com/maryykmv/foodgram-project-react/actions/workflows/mail.yml/badge.svg)
 
-URL: https://foodgramprjct.ddns.net
-IP: 158.160.69.26
 
 «Продуктовый помощник». На этом сервисе пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 ___
@@ -51,7 +49,7 @@ POSTGRES_PASSWORD=<password>
 DB_HOST=db
 DB_PORT=5432
 MEDIA_DOMAIN='http://foodgramprjct.ddns.net'
-ALLOWED_HOSTS='158.160.69.26 127.0.0.1 backend localhost foodgramprjct.ddns.net'
+ALLOWED_HOSTS='127.0.0.1 backend localhost foodgramprjct.ddns.net'
 DEBUG=False
 
 ```
@@ -168,7 +166,7 @@ POSTGRES_PASSWORD=<password>
 DB_HOST=db
 DB_PORT=5432
 MEDIA_DOMAIN='http://foodgramprjct.ddns.net'
-ALLOWED_HOSTS='158.160.69.26 127.0.0.1 backend localhost foodgramprjct.ddns.net'
+ALLOWED_HOSTS='127.0.0.1 backend localhost foodgramprjct.ddns.net'
 DEBUG=False
 
 ```
@@ -221,9 +219,4 @@ sudo docker compose -f docker-compose.production.yml down -v
 ```
 
 ## Автор проекта
-_[Мария Константинова](https://github.com/wildcat3333)_, python-developer
-
-___
-<p>
-    <span>© 2023, Contributors on git </span>
-</p>
+_[Мария Константинова](https://github.com/maryykmv)_, python-developer
