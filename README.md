@@ -26,7 +26,7 @@ ___
 ## Стек технологий
 - проект написан на Python с использованием Django, Django REST Framework
 - базы данны - PostgreSQL
-- система контроля версий - git
+- система контроля версий - Git
 - frontend - React
 
 
@@ -48,8 +48,8 @@ POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<password>
 DB_HOST=db
 DB_PORT=5432
-MEDIA_DOMAIN='http://foodgramprjct.ddns.net'
-ALLOWED_HOSTS='127.0.0.1 backend localhost foodgramprjct.ddns.net'
+MEDIA_DOMAIN='http://YOUR_DOMAIN_NAME'
+ALLOWED_HOSTS='YOUR_IP 127.0.0.1 backend localhost YOUR_DOMAIN_NAME'
 DEBUG=False
 
 ```
@@ -165,8 +165,8 @@ POSTGRES_USER=<user>
 POSTGRES_PASSWORD=<password>
 DB_HOST=db
 DB_PORT=5432
-MEDIA_DOMAIN='http://foodgramprjct.ddns.net'
-ALLOWED_HOSTS='127.0.0.1 backend localhost foodgramprjct.ddns.net'
+MEDIA_DOMAIN='http://YOUR_DOMAIN_NAME'
+ALLOWED_HOSTS='127.0.0.1 backend localhost YOUR_DOMAIN_NAME'
 DEBUG=False
 
 ```
@@ -191,8 +191,8 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 Список сохранён в форматах JSON и CSV: данные из списка необходимо загрузить в базу через админку проекта (импорт). 
 
 ```
-https://foodgramprjct.ddns.net/admin/api/ingredient/import/
-https://foodgramprjct.ddns.net/admin/api/tag/import/
+https://YOUR_DOMAIN_NAME/admin/api/ingredient/import/
+https://YOUR_DOMAIN_NAME/admin/api/tag/import/
 ```
 
 - Собираем статику приложения
